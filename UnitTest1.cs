@@ -1,14 +1,14 @@
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
-using Selenium;
+using OpenQA.Selenium.Support.UI;
 using System;
 
-namespace Test
+namespace Selenium
 {
     public class Tests
     {
-        IWebDriver driver;
+        private IWebDriver driver;
 
         [SetUp]
         public void Setup()
@@ -16,10 +16,10 @@ namespace Test
             driver = new FirefoxDriver(@"C:\Users\woj_9\source\repos\Selenium\Driver\");
         }
 
-        //incoming test were copypasted from internet as part of learning. Some of them were failing from the begginging.
+        //incoming test were copypasted from internet as part of learning. Some of them were failing from the begginging and were fixed.
 
         [Test]
-        public void Test1()
+        public void Test1() //unknown source.
         {
             driver.Url = "https://toolsqa.com/";
             driver.FindElement(By.ClassName("category__icon--wrapper")).Click();
@@ -30,10 +30,21 @@ namespace Test
         }
 
         [Test]
-        public void Test2() //not corrected yet. Fails;
+        public void Test2() //code from https://toolsqa.com/selenium-webdriver/c-sharp/iwebdriver-browser-commands-in-c-sharp/
         {
-            driver.Url = "https://demoqa.com/frames-and-windows/";
-            driver.FindElement(By.XPath(".//*[@id='tabs-1']/div/p/a")).Click();
+            driver.Url = "https://demoqa.com/alertsWindows"; //corrected by me
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)); //thanks https://alexsiminiuc.medium.com/c-expected-conditions-are-deprecated-so-what-b451365adc24 for information about waitings.
+            wait.Until(c =>
+            {
+                return c.FindElement(By.XPath("//*[contains(@class,'show')]//li[@id='item-0']")).Displayed;
+            });
+            driver.FindElement(By.XPath("//*[contains(@class,'show')]//li[@id='item-0']")).Click();
+            //driver.FindElement(By.XPath(".//*[@id='tabs-1']/div/p/a")).Click();
+            wait.Until(c =>
+            {
+                return c.FindElement(By.XPath("//*[@id='windowButton']")).Displayed;
+            });
+            driver.FindElement(By.XPath("//*[@id='windowButton']")).Click(); //corrected by me
         }
 
         //incoming tests were writted by me and not copy pasted from internet
@@ -71,7 +82,7 @@ namespace Test
             foreach (IWebElement webElement in webElements)
             {
                 text = webElement.Text.Trim();
-                Console.WriteLine(text); //normally not used allows to see what values were found for debugging purposes
+                //Console.WriteLine(text); //normally not used allows to see what values were found for debugging purposes
                 Assert.True(text.EndsWith("apple"));
             }
         }

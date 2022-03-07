@@ -33,17 +33,11 @@ namespace Selenium
         public void Test2() //code from https://toolsqa.com/selenium-webdriver/c-sharp/iwebdriver-browser-commands-in-c-sharp/
         {
             driver.Url = "https://demoqa.com/alertsWindows"; //corrected by me
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)); //thanks https://alexsiminiuc.medium.com/c-expected-conditions-are-deprecated-so-what-b451365adc24 for information about waitings.
-            wait.Until(c =>
-            {
-                return c.FindElement(By.XPath("//*[contains(@class,'show')]//li[@id='item-0']")).Displayed;
-            });
+            Helpers.Waits Waits = new(driver);
+            Waits.ElementClickable("//*[contains(@class,'show')]//li[@id='item-0']");
             driver.FindElement(By.XPath("//*[contains(@class,'show')]//li[@id='item-0']")).Click();
             //driver.FindElement(By.XPath(".//*[@id='tabs-1']/div/p/a")).Click();
-            wait.Until(c =>
-            {
-                return c.FindElement(By.XPath("//*[@id='windowButton']")).Displayed;
-            });
+            Waits.ElementClickable("//*[@id='windowButton']");
             driver.FindElement(By.XPath("//*[@id='windowButton']")).Click(); //corrected by me
         }
 
@@ -54,6 +48,21 @@ namespace Selenium
         {
             driver.Url = "https://en.wikipedia.org/wiki/List_of_apple_dishes";
             System.Collections.ObjectModel.ReadOnlyCollection<IWebElement> webElements = driver.FindElements(By.XPath("//div[contains(@class,'hatnote')]/following-sibling::ul[1]//a[starts-with(@title,'Apple')]"));
+            string text;
+            foreach (IWebElement webElement in webElements)
+            {
+                text = webElement.Text.Trim();
+                //Console.WriteLine(text); //normally not used allows to see what values were found for debugging purposes
+                Assert.True(text.StartsWith("Apple"));
+            }
+        }
+
+        [Test]
+        public void FindAppleDishessStartingWithApplePageObject()
+        {
+            driver.Url = "https://en.wikipedia.org/wiki/List_of_apple_dishes";
+            Pages.WikipediaPage? WikipediaPagePOF = new(driver);
+            System.Collections.ObjectModel.ReadOnlyCollection<IWebElement> webElements = WikipediaPagePOF.AppleDishesList();
             string text;
             foreach (IWebElement webElement in webElements)
             {
@@ -78,6 +87,22 @@ namespace Selenium
                 webElements = driver.FindElements(By.XPath("//div[contains(@class,'div-col')]//a[substring(@title, string-length(@title) - string-length('apple') + 1) ='apple']"));
                 Console.WriteLine("X-Path 1.0 was used"); //inform us when this expression was used
             }
+            string text;
+            foreach (IWebElement webElement in webElements)
+            {
+                text = webElement.Text.Trim();
+                //Console.WriteLine(text); //normally not used allows to see what values were found for debugging purposes
+                Assert.True(text.EndsWith("apple"));
+            }
+        }
+
+        [Test]
+        public void FindAllSeeAlsoLinksEndingWithApplePageObject()
+        {
+            driver.Url = "https://en.wikipedia.org/wiki/List_of_apple_dishes";
+            System.Collections.ObjectModel.ReadOnlyCollection<IWebElement> webElements;
+            Pages.WikipediaPage? WikipediaPagePOF = new(driver);
+            webElements = WikipediaPagePOF.SeeAllEndingsWithApple();
             string text;
             foreach (IWebElement webElement in webElements)
             {
